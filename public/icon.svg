@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 108" role="img" aria-labelledby="title">
+  <title id="title">FlowSpark Kids droplet mascot</title>
+  <defs>
+    <linearGradient id="water" x1="18" y1="10" x2="72" y2="94" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#42C6E8"/>
+      <stop offset="1" stop-color="#087EAE"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="66" y1="65" x2="91" y2="92" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7BCB7A"/>
+      <stop offset="1" stop-color="#35945D"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#water)" d="M46.8 4.7C42.1 13.9 18 43.2 18 65.2 18 84.4 31.8 98 48.8 98s30.8-13.6 30.8-32.8c0-22-24-51.3-28.8-60.5a2.3 2.3 0 0 0-4 0Z"/>
+  <path fill="#fff" fill-opacity=".25" d="M34.6 25.4c-6.8 10-12.8 20.5-15 29.7 3.2-5.3 8.7-9.5 16-12.3 8.3-3.2 13.7-10.9 14.6-22.8-4.4 7-9.6 10.6-15.6 10.8Z"/>
+  <circle cx="39" cy="65" r="3.7" fill="#17324D"/>
+  <circle cx="61" cy="65" r="3.7" fill="#17324D"/>
+  <circle cx="38" cy="64" r="1.1" fill="#fff"/>
+  <circle cx="60" cy="64" r="1.1" fill="#fff"/>
+  <path stroke="#17324D" stroke-linecap="round" stroke-width="3" d="M43.5 75c3.5 3.3 8.8 3.3 12.3 0"/>
+  <path fill="#F8C34A" d="m51 31 2.5 6.6 6.5 2.5-6.5 2.5L51 49l-2.5-6.4-6.5-2.5 6.5-2.5L51 31Z"/>
+  <path fill="url(#leaf)" d="M66.5 82.4c5.8-11.8 15.7-13.7 25.4-11.6-1.8 10.7-8 19.3-22.5 19.1-1.8 4-4.2 7.3-7 9.5l-2.9-3.2c3.6-3 5.9-7.4 7-13.8Z"/>
+  <path fill="none" stroke="#287A50" stroke-linecap="round" stroke-width="2" d="M69 86.8c5.7-4 11-7.4 16.2-9.8"/>
+</svg>
