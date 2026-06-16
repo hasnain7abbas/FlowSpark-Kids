@@ -4,11 +4,12 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react'
-import type { ToolId } from '../types'
+import type { SimulationMetrics, ToolId } from '../types'
 
 interface FluidCanvasProps {
   selectedTool: ToolId
   onToolAction: (tool: ToolId) => void
+  onMetricsChange: (metrics: SimulationMetrics) => void
 }
 
 export interface FluidCanvasHandle {
@@ -42,17 +43,28 @@ const particleColors: Record<Particle['kind'], string> = {
 }
 
 const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
-  ({ selectedTool, onToolAction }, ref) => {
+  ({ selectedTool, onToolAction, onMetricsChange }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const particlesRef = useRef<Particle[]>([])
     const objectsRef = useRef<SceneObject[]>([])
     const selectedToolRef = useRef(selectedTool)
+    const onToolActionRef = useRef(onToolAction)
+    const onMetricsChangeRef = useRef(onMetricsChange)
     const pointerRef = useRef({ down: false, x: 0, y: 0 })
     const rainUntilRef = useRef(0)
+    const lastMetricsTimeRef = useRef(0)
 
     useEffect(() => {
       selectedToolRef.current = selectedTool
     }, [selectedTool])
+
+    useEffect(() => {
+      onToolActionRef.current = onToolAction
+    }, [onToolAction])
+
+    useEffect(() => {
+      onMetricsChangeRef.current = onMetricsChange
+    }, [onMetricsChange])
 
     const reset = () => {
       particlesRef.current = []
@@ -363,6 +375,47 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
         particlesRef.current = particlesRef.current.filter(
           (particle) => particle.life > 0,
         )
+
+        if (time - lastMetricsTimeRef.current > 450) {
+          lastMetricsTimeRef.current = time
+          const metrics = particlesRef.current.reduce<SimulationMetrics>(
+            (total, particle) => {
+              if (particle.kind === 'water' && particle.x > width * 0.78) {
+                total.waterInOcean += 1
+              }
+              if (particle.kind === 'pollution') {
+                total.pollutionRemaining += 1
+              }
+              if (particle.kind === 'smoke' && particle.x > width * 0.58) {
+                total.smokeToRight += 1
+              }
+              if (
+                particle.kind === 'heat' &&
+                particle.y < height * 0.42 &&
+                particle.vy < 0
+              ) {
+                total.warmRising += 1
+              }
+              if (
+                particle.kind === 'ice' &&
+                particle.y > height * 0.58 &&
+                particle.vy > 0
+              ) {
+                total.cooledSinking += 1
+              }
+              return total
+            },
+            {
+              waterInOcean: 0,
+              pollutionRemaining: 0,
+              smokeToRight: 0,
+              warmRising: 0,
+              cooledSinking: 0,
+            },
+          )
+          onMetricsChangeRef.current(metrics)
+        }
+
         drawParticles()
         objectsRef.current.forEach(drawObject)
 
@@ -405,7 +458,7 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
         const point = getPoint(event)
         pointerRef.current = { down: true, ...point }
         applyTool(point.x, point.y, selectedToolRef.current)
-        onToolAction(selectedToolRef.current)
+        onToolActionRef.current(selectedToolRef.current)
       }
 
       const handlePointerMove = (event: PointerEvent) => {
@@ -454,7 +507,7 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
         canvas.removeEventListener('pointerup', handlePointerUp)
         canvas.removeEventListener('pointercancel', handlePointerUp)
       }
-    }, [onToolAction])
+    }, [])
 
     return (
       <canvas

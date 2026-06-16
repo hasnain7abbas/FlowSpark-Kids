@@ -13,8 +13,13 @@ import {
 } from 'lucide-react'
 import './App.css'
 import { experiments, toolIcons, tools } from './data'
+import {
+  countToolUse,
+  createToolUseCounts,
+  evaluateSuccess,
+} from './experiments/successRules'
 import { FluidCanvas, type FluidCanvasHandle } from './simulation/FluidCanvas'
-import type { Experiment, Observation, ToolId } from './types'
+import type { Experiment, Observation, SimulationMetrics, ToolId } from './types'
 
 const starterObservations: Observation[] = [
   {
@@ -23,6 +28,14 @@ const starterObservations: Observation[] = [
     tone: 'ready',
   },
 ]
+
+const emptyMetrics: SimulationMetrics = {
+  waterInOcean: 0,
+  pollutionRemaining: 0,
+  smokeToRight: 0,
+  warmRising: 0,
+  cooledSinking: 0,
+}
 
 function App() {
   const [activeExperiment, setActiveExperiment] = useState<Experiment>(
@@ -33,6 +46,8 @@ function App() {
   const [observations, setObservations] =
     useState<Observation[]>(starterObservations)
   const [completed, setCompleted] = useState(false)
+  const [toolUses, setToolUses] = useState(createToolUseCounts)
+  const [metrics, setMetrics] = useState<SimulationMetrics>(emptyMetrics)
   const canvasRef = useRef<FluidCanvasHandle>(null)
   const observationId = useRef(2)
 
@@ -59,19 +74,45 @@ function App() {
       if (!tool) return
 
       addObservation(tool.observation)
-
-      if (
-        activeExperiment.id === 'river' &&
-        (toolId === 'water' || toolId === 'drain')
-      ) {
-        setCompleted(true)
-      }
     },
-    [activeExperiment.id, addObservation],
+    [addObservation],
+  )
+
+  const checkSuccess = useCallback(
+    (nextMetrics: SimulationMetrics, nextToolUses = toolUses) => {
+      if (completed) return
+      if (!evaluateSuccess(activeExperiment, nextToolUses, nextMetrics)) return
+
+      setCompleted(true)
+      addObservation(activeExperiment.successMessage, 'success')
+    },
+    [activeExperiment, addObservation, completed, toolUses],
+  )
+
+  const handleMetricsChange = useCallback(
+    (nextMetrics: SimulationMetrics) => {
+      setMetrics(nextMetrics)
+      checkSuccess(nextMetrics)
+    },
+    [checkSuccess],
+  )
+
+  const registerToolAction = useCallback(
+    (toolId: ToolId) => {
+      handleToolAction(toolId)
+      setToolUses((current) => {
+        const nextToolUses = countToolUse(current, toolId)
+        checkSuccess(metrics, nextToolUses)
+        return nextToolUses
+      })
+    },
+    [checkSuccess, handleToolAction, metrics],
   )
 
   const resetScene = () => {
     canvasRef.current?.reset()
+    setToolUses(createToolUseCounts())
+    setMetrics(emptyMetrics)
     setObservations(starterObservations)
     setCompleted(false)
   }
@@ -79,6 +120,8 @@ function App() {
   const selectExperiment = (experiment: Experiment) => {
     setActiveExperiment(experiment)
     setCompleted(false)
+    setToolUses(createToolUseCounts())
+    setMetrics(emptyMetrics)
     canvasRef.current?.reset()
     setObservations([
       {
@@ -165,6 +208,7 @@ function App() {
                 }`}
                 key={experiment.id}
                 onClick={() => selectExperiment(experiment)}
+                data-experiment-id={experiment.id}
                 type="button"
               >
                 <span className="experiment-number">
@@ -196,7 +240,8 @@ function App() {
             <FluidCanvas
               ref={canvasRef}
               selectedTool={selectedTool}
-              onToolAction={handleToolAction}
+              onToolAction={registerToolAction}
+              onMetricsChange={handleMetricsChange}
             />
             <div className="canvas-label canvas-label--mountain">
               <span>Mountain spring</span>
@@ -215,7 +260,7 @@ function App() {
                 </span>
                 <div>
                   <strong>Water found its way!</strong>
-                  <small>You guided the flow toward the ocean.</small>
+                  <small>{activeExperiment.successMessage}</small>
                 </div>
               </div>
             )}
@@ -238,6 +283,7 @@ function App() {
                     onClick={() => setSelectedTool(tool.id)}
                     type="button"
                     aria-pressed={selectedTool === tool.id}
+                    data-tool-id={tool.id}
                     title={tool.tip}
                   >
                     <span>
@@ -276,7 +322,7 @@ function App() {
           <article className="notebook-section observation-note">
             <span className="note-label">What happened?</span>
             <div className="observation-lens">
-              <div className="lens-spark">✦</div>
+              <div className="lens-spark">*</div>
               <p>{observations[0]?.text}</p>
             </div>
           </article>

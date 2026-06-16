@@ -35,6 +35,7 @@ export interface Experiment {
   prompt: string
   steps: string
   science: string
+  successMessage: string
   teacherNote: string
   vocabulary: string[]
 }
@@ -43,4 +44,14 @@ export interface Observation {
   id: number
   text: string
   tone: 'ready' | 'noted' | 'success'
+}
+
+export type ToolUseCounts = Record<ToolId, number>
+
+export interface SimulationMetrics {
+  waterInOcean: number
+  pollutionRemaining: number
+  smokeToRight: number
+  warmRising: number
+  cooledSinking: number
 }

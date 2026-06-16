@@ -125,6 +125,7 @@ export const experiments: Experiment[] = [
     prompt: 'Can you guide the water across?',
     steps: 'Add water near the mountain. Use rocks or walls to shape its path.',
     science: 'Water follows a path and changes direction when something blocks it.',
+    successMessage: 'Nice work. You guided the water safely to the ocean.',
     teacherNote:
       'Ask students to predict the route before placing each obstacle. Compare a straight path with a winding path.',
     vocabulary: ['flow', 'path', 'obstacle'],
@@ -136,6 +137,7 @@ export const experiments: Experiment[] = [
     prompt: 'What can slow the rainwater?',
     steps: 'Make rain, then add trees, walls, and a drain before water spreads.',
     science: 'Trees and barriers can slow water and help reduce flooding.',
+    successMessage: 'Great planning. Your trees and drain helped slow the flood.',
     teacherNote:
       'Discuss how roots hold soil and how drains give rainwater a safer place to go.',
     vocabulary: ['rain', 'flood', 'barrier'],
@@ -147,6 +149,7 @@ export const experiments: Experiment[] = [
     prompt: 'How far will one dirty drop travel?',
     steps: 'Add clean water, then place one pollution drop and stir gently.',
     science: 'Pollution can travel far away from the place where it started.',
+    successMessage: 'You spotted it. One dirty drop can spread through a lot of water.',
     teacherNote:
       'Connect the model to litter, oil, and chemicals entering streams after rainfall.',
     vocabulary: ['pollution', 'spread', 'source'],
@@ -158,6 +161,7 @@ export const experiments: Experiment[] = [
     prompt: 'Where should the filter go?',
     steps: 'Add pollution and water. Place a filter across the moving flow.',
     science: 'Filters catch some particles while water moves through them.',
+    successMessage: 'Cleaner pond! The filter caught some of the dirty color.',
     teacherNote:
       'Explain that real water treatment uses several cleaning steps, not only one filter.',
     vocabulary: ['filter', 'particle', 'clean'],
@@ -169,6 +173,7 @@ export const experiments: Experiment[] = [
     prompt: 'Can smoke reveal the air?',
     steps: 'Add smoke, then place a fan and a wall. Watch the smoke change path.',
     science: 'Air is invisible, but we can see its movement when it carries smoke.',
+    successMessage: 'You made the wind visible. The smoke showed where air moved.',
     teacherNote:
       'Invite students to name other clues that air is moving, such as flags or leaves.',
     vocabulary: ['air', 'wind', 'direction'],
@@ -180,6 +185,7 @@ export const experiments: Experiment[] = [
     prompt: 'Which way will warm air move?',
     steps: 'Add smoke above a heater, then compare it with smoke near an ice block.',
     science: 'Warm air usually rises while cooler air moves downward.',
+    successMessage: 'Good observation. Warm flow rose while cooler flow sank.',
     teacherNote:
       'Relate the motion to warm air above a radiator and cool air near the floor.',
     vocabulary: ['heat', 'warm', 'cool'],
@@ -191,6 +197,7 @@ export const experiments: Experiment[] = [
     prompt: 'Can one rock split a stream?',
     steps: 'Add a few water drops, place rocks in the path, then drag to stir.',
     science: 'Flow changes direction when it meets an obstacle.',
+    successMessage: 'Flow detective! The rock split the water into new paths.',
     teacherNote:
       'Compare one large rock with several small rocks and discuss the different patterns.',
     vocabulary: ['flow', 'rock', 'direction'],
