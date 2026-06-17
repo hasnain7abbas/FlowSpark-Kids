@@ -39,7 +39,8 @@ export const evaluateSuccess = (
       return (
         counts.rain > 0 &&
         counts.tree + counts.wall + counts.rock >= 2 &&
-        counts.drain > 0
+        counts.drain > 0 &&
+        metrics.waterNearVillage < 35
       )
     case 'pollution':
       return counts.pollution > 0 && counts.water > 0 && metrics.pollutionRemaining > 25

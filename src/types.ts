@@ -50,6 +50,7 @@ export type ToolUseCounts = Record<ToolId, number>
 
 export interface SimulationMetrics {
   waterInOcean: number
+  waterNearVillage: number
   pollutionRemaining: number
   smokeToRight: number
   warmRising: number

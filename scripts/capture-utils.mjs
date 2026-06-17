@@ -107,6 +107,8 @@ export const runFloodDemo = async (page) => {
   await clickTool(page, 'tree')
   await clickCanvas(page, 0.37, 0.61)
   await clickCanvas(page, 0.49, 0.67)
+  await clickTool(page, 'rock')
+  await clickCanvas(page, 0.43, 0.58)
   await clickTool(page, 'wall')
   await clickCanvas(page, 0.58, 0.73)
   await clickTool(page, 'drain')

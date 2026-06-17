@@ -113,36 +113,26 @@ button {
 }
 
 .icon-button,
-.teacher-toggle,
-.sound-button {
+.teacher-toggle {
   min-height: 40px;
   border: 1px solid #dce8e9;
   border-radius: 13px;
+  padding: 0 12px;
   color: var(--ink);
   background: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
+  font-size: 11px;
+  font-weight: 800;
   cursor: pointer;
   box-shadow: 0 5px 15px rgb(37 83 100 / 5%);
   transition: 180ms ease;
 }
 
-.icon-button,
-.teacher-toggle {
-  padding: 0 12px;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.sound-button {
-  width: 40px;
-}
-
 .icon-button:hover,
-.teacher-toggle:hover,
-.sound-button:hover {
+.teacher-toggle:hover {
   border-color: #a9cfd6;
   transform: translateY(-1px);
 }
@@ -799,10 +789,6 @@ a:focus-visible {
 
   .brand strong {
     font-size: 18px;
-  }
-
-  .sound-button {
-    display: none;
   }
 
   .topbar-actions {

@@ -9,7 +9,6 @@ import {
   Lightbulb,
   RotateCcw,
   Sparkles,
-  Volume2,
 } from 'lucide-react'
 import './App.css'
 import { experiments, toolIcons, tools } from './data'
@@ -31,6 +30,7 @@ const starterObservations: Observation[] = [
 
 const emptyMetrics: SimulationMetrics = {
   waterInOcean: 0,
+  waterNearVillage: 0,
   pollutionRemaining: 0,
   smokeToRight: 0,
   warmRising: 0,
@@ -178,13 +178,6 @@ function App() {
             <span>Teacher</span>
             <i aria-hidden="true" />
           </button>
-          <button
-            className="sound-button"
-            type="button"
-            aria-label="Sound is on"
-          >
-            <Volume2 size={18} />
-          </button>
         </div>
       </header>
 
@@ -259,7 +252,7 @@ function App() {
                   <Check size={18} strokeWidth={3} />
                 </span>
                 <div>
-                  <strong>Water found its way!</strong>
+                  <strong>Mission complete!</strong>
                   <small>{activeExperiment.successMessage}</small>
                 </div>
               </div>

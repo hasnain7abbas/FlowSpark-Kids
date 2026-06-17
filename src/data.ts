@@ -32,9 +32,9 @@ export const tools: Tool[] = [
   },
   {
     id: 'rock',
-    name: 'Rock',
-    tip: 'Place a rock to split the flow.',
-    observation: 'The rock blocks the path, so water moves around it.',
+    name: 'Rock / Hill',
+    tip: 'Place a rock or hill to split the flow.',
+    observation: 'The rock makes a tiny hill. Water bends around it.',
     color: 'stone',
   },
   {
@@ -48,7 +48,7 @@ export const tools: Tool[] = [
     id: 'tree',
     name: 'Tree',
     tip: 'Trees slow water near their roots.',
-    observation: 'The tree roots are slowing water nearby.',
+    observation: 'The tree roots are soaking up and slowing nearby water.',
     color: 'green',
   },
   {
@@ -96,8 +96,8 @@ export const tools: Tool[] = [
   {
     id: 'rain',
     name: 'Rain',
-    tip: 'Make a small rain cloud over the table.',
-    observation: 'Rain is adding many little drops at once.',
+    tip: 'Place a rain cloud. Drops fall from that spot.',
+    observation: 'The rain cloud is adding water right below it.',
     color: 'blue',
   },
 ]
@@ -135,9 +135,9 @@ export const experiments: Experiment[] = [
     title: 'Stop the Flood',
     goal: 'Protect the tiny village from heavy rain.',
     prompt: 'What can slow the rainwater?',
-    steps: 'Make rain, then add trees, walls, and a drain before water spreads.',
-    science: 'Trees and barriers can slow water and help reduce flooding.',
-    successMessage: 'Great planning. Your trees and drain helped slow the flood.',
+    steps: 'Make rain, then add trees, rocks, walls, and a drain before water reaches the village.',
+    science: 'Trees, hills, barriers, and drains can slow water and help reduce flooding.',
+    successMessage: 'Great planning. Your barriers, trees, and drain helped protect the village.',
     teacherNote:
       'Discuss how roots hold soil and how drains give rainwater a safer place to go.',
     vocabulary: ['rain', 'flood', 'barrier'],

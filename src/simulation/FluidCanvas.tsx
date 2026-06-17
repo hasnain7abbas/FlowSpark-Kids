@@ -32,6 +32,13 @@ interface SceneObject {
   y: number
   kind: ToolId
   size: number
+  angle: number
+}
+
+interface RainCloud {
+  x: number
+  y: number
+  until: number
 }
 
 const particleColors: Record<Particle['kind'], string> = {
@@ -42,11 +49,33 @@ const particleColors: Record<Particle['kind'], string> = {
   ice: 'rgba(95, 197, 225, 0.38)',
 }
 
+const distanceToSegment = (
+  px: number,
+  py: number,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+) => {
+  const dx = bx - ax
+  const dy = by - ay
+  const lengthSquared = dx * dx + dy * dy || 1
+  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / lengthSquared))
+  const x = ax + t * dx
+  const y = ay + t * dy
+  return {
+    distance: Math.hypot(px - x, py - y),
+    closestX: x,
+    closestY: y,
+  }
+}
+
 const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
   ({ selectedTool, onToolAction, onMetricsChange }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const particlesRef = useRef<Particle[]>([])
     const objectsRef = useRef<SceneObject[]>([])
+    const rainCloudsRef = useRef<RainCloud[]>([])
     const selectedToolRef = useRef(selectedTool)
     const onToolActionRef = useRef(onToolAction)
     const onMetricsChangeRef = useRef(onMetricsChange)
@@ -69,6 +98,7 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
     const reset = () => {
       particlesRef.current = []
       objectsRef.current = []
+      rainCloudsRef.current = []
       rainUntilRef.current = 0
     }
 
@@ -164,6 +194,43 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
         ocean.addColorStop(1, 'rgba(4, 109, 159, 0.28)')
         context.fillStyle = ocean
         context.fillRect(width * 0.78, 0, width * 0.22, height)
+
+        context.save()
+        context.translate(width * 0.62, height * 0.78)
+        context.fillStyle = 'rgba(255, 244, 214, 0.88)'
+        context.strokeStyle = 'rgba(117, 91, 45, 0.2)'
+        context.lineWidth = 2
+        context.beginPath()
+        context.roundRect(-32, -18, 64, 36, 8)
+        context.fill()
+        context.stroke()
+        context.fillStyle = '#9d7255'
+        context.fillRect(-26, -5, 12, 23)
+        context.fillRect(-5, -2, 12, 20)
+        context.fillRect(16, -8, 12, 26)
+        context.fillStyle = '#d95c55'
+        context.beginPath()
+        context.moveTo(-35, -18)
+        context.lineTo(-22, -32)
+        context.lineTo(-9, -18)
+        context.closePath()
+        context.fill()
+        context.beginPath()
+        context.moveTo(-14, -18)
+        context.lineTo(1, -33)
+        context.lineTo(16, -18)
+        context.closePath()
+        context.fill()
+        context.beginPath()
+        context.moveTo(7, -18)
+        context.lineTo(23, -35)
+        context.lineTo(39, -18)
+        context.closePath()
+        context.fill()
+        context.fillStyle = 'rgba(23, 50, 77, 0.75)'
+        context.font = '700 10px sans-serif'
+        context.fillText('village', -20, 36)
+        context.restore()
       }
 
       const applyForces = (particle: Particle) => {
@@ -173,33 +240,67 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
           const distance = Math.hypot(dx, dy) || 1
           const range = object.size * 2.6
 
-          if (object.kind === 'fan' && distance < range * 2) {
-            particle.vx += 0.032
+          if (object.kind === 'fan' && distance < range * 2.2) {
+            particle.vx += 0.052
+            if (particle.kind === 'smoke') particle.life += 0.6
           }
-          if (object.kind === 'heater' && distance < range * 1.7) {
-            particle.vy -= 0.035
+          if (object.kind === 'heater' && distance < range * 1.8) {
+            particle.vy -= 0.054
+            particle.vx += Math.sin(distance) * 0.005
           }
-          if (object.kind === 'ice' && distance < range * 1.7) {
-            particle.vy += 0.025
+          if (object.kind === 'ice' && distance < range * 1.8) {
+            particle.vy += 0.046
           }
           if (object.kind === 'drain' && distance < range * 2.6) {
-            particle.vx -= (dx / distance) * 0.025
-            particle.vy -= (dy / distance) * 0.025
+            particle.vx -= (dx / distance) * 0.06
+            particle.vy -= (dy / distance) * 0.06
+            if (distance < object.size * 0.9) particle.life -= 14
           }
-          if (object.kind === 'tree' && distance < range) {
-            particle.vx *= 0.975
-            particle.vy *= 0.975
+          if (object.kind === 'tree' && distance < range * 1.25) {
+            particle.vx *= 0.88
+            particle.vy *= 0.88
+            if (particle.kind === 'water' && distance < object.size * 1.35) {
+              particle.life -= 3.2
+            }
           }
-          if (object.kind === 'filter' && distance < object.size * 1.4) {
-            if (particle.kind === 'pollution') particle.life -= 8
-            particle.vx *= 0.96
+          if (object.kind === 'filter') {
+            const filterHit = distanceToSegment(
+              particle.x,
+              particle.y,
+              object.x,
+              object.y - object.size * 1.45,
+              object.x,
+              object.y + object.size * 1.45,
+            )
+            if (filterHit.distance < particle.radius + 6) {
+              if (particle.kind === 'pollution') particle.life -= 20
+              particle.vx *= 0.78
+            }
           }
 
-          const isObstacle = object.kind === 'rock' || object.kind === 'wall'
-          if (isObstacle && distance < object.size + particle.radius * 0.5) {
-            const force = (object.size - distance + particle.radius) * 0.018
+          if (object.kind === 'rock' && distance < object.size * 1.6 + particle.radius) {
+            const force = (object.size * 1.6 - distance + particle.radius) * 0.04
             particle.vx += (dx / distance) * force
             particle.vy += (dy / distance) * force
+            if (particle.kind === 'water') particle.vx += 0.012
+          }
+
+          if (object.kind === 'wall') {
+            const halfLength = object.size * 2.3
+            const ax = object.x - Math.cos(object.angle) * halfLength
+            const ay = object.y - Math.sin(object.angle) * halfLength
+            const bx = object.x + Math.cos(object.angle) * halfLength
+            const by = object.y + Math.sin(object.angle) * halfLength
+            const hit = distanceToSegment(particle.x, particle.y, ax, ay, bx, by)
+            if (hit.distance < particle.radius + 9) {
+              const nx = (particle.x - hit.closestX) / (hit.distance || 1)
+              const ny = (particle.y - hit.closestY) / (hit.distance || 1)
+              const push = (particle.radius + 11 - hit.distance) * 0.07
+              particle.vx += nx * push
+              particle.vy += ny * push
+              particle.vx *= 0.76
+              particle.vy *= 0.76
+            }
           }
         })
       }
@@ -251,10 +352,11 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
           context.closePath()
           context.fill()
         } else if (object.kind === 'wall') {
+          context.rotate(object.angle)
           context.fillStyle = '#7c8e91'
-          context.fillRect(-object.size * 1.5, -7, object.size * 3, 14)
+          context.fillRect(-object.size * 2.3, -8, object.size * 4.6, 16)
           context.strokeStyle = 'rgba(255,255,255,.32)'
-          context.strokeRect(-object.size * 1.5, -7, object.size * 3, 14)
+          context.strokeRect(-object.size * 2.3, -8, object.size * 4.6, 16)
         } else if (object.kind === 'tree') {
           context.fillStyle = '#745a3b'
           context.fillRect(-3, 3, 6, object.size * 0.8)
@@ -326,16 +428,19 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
         const delta = Math.min((time - lastTime) / 16.67, 2)
         lastTime = time
 
-        if (rainUntilRef.current > time) {
+        rainCloudsRef.current = rainCloudsRef.current.filter(
+          (cloud) => cloud.until > time,
+        )
+        rainCloudsRef.current.forEach((cloud) => {
           addParticles(
-            width * (0.25 + Math.random() * 0.5),
-            8,
+            cloud.x + (Math.random() - 0.5) * 95,
+            Math.max(10, cloud.y + 18),
             'water',
-            2,
-            0,
-            0.8,
+            3,
+            (Math.random() - 0.5) * 0.08,
+            1.4,
           )
-        }
+        })
 
         drawBackground()
 
@@ -383,6 +488,14 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
               if (particle.kind === 'water' && particle.x > width * 0.78) {
                 total.waterInOcean += 1
               }
+              if (
+                particle.kind === 'water' &&
+                particle.x > width * 0.54 &&
+                particle.x < width * 0.7 &&
+                particle.y > height * 0.68
+              ) {
+                total.waterNearVillage += 1
+              }
               if (particle.kind === 'pollution') {
                 total.pollutionRemaining += 1
               }
@@ -407,6 +520,7 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
             },
             {
               waterInOcean: 0,
+              waterNearVillage: 0,
               pollutionRemaining: 0,
               smokeToRight: 0,
               warmRising: 0,
@@ -417,6 +531,29 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
         }
 
         drawParticles()
+        rainCloudsRef.current.forEach((cloud) => {
+          context.save()
+          context.translate(cloud.x, cloud.y)
+          context.fillStyle = 'rgba(255, 255, 255, 0.86)'
+          context.strokeStyle = 'rgba(37, 118, 151, 0.18)'
+          context.lineWidth = 2
+          context.beginPath()
+          context.arc(-22, 0, 16, Math.PI * 0.85, Math.PI * 2.05)
+          context.arc(0, -8, 21, Math.PI, Math.PI * 2.05)
+          context.arc(24, 0, 16, Math.PI * 1.15, Math.PI * 0.15)
+          context.closePath()
+          context.fill()
+          context.stroke()
+          context.strokeStyle = 'rgba(26, 168, 217, 0.55)'
+          context.lineWidth = 3
+          for (let index = -1; index <= 1; index += 1) {
+            context.beginPath()
+            context.moveTo(index * 18, 24)
+            context.lineTo(index * 18 - 6, 39)
+            context.stroke()
+          }
+          context.restore()
+        })
         objectsRef.current.forEach(drawObject)
 
         animationFrame = requestAnimationFrame(animate)
@@ -438,13 +575,23 @@ const FluidCanvas = forwardRef<FluidCanvasHandle, FluidCanvasProps>(
             tool === 'smoke' ? -0.2 : 0,
           )
         } else if (tool === 'rain') {
-          rainUntilRef.current = performance.now() + 5000
+          rainUntilRef.current = performance.now() + 6500
+          rainCloudsRef.current.push({
+            x,
+            y: Math.max(30, Math.min(y, height * 0.36)),
+            until: rainUntilRef.current,
+          })
+          rainCloudsRef.current = rainCloudsRef.current.slice(-4)
         } else {
           objectsRef.current.push({
             x,
             y,
             kind: tool,
-            size: tool === 'wall' ? 24 : 20,
+            size: tool === 'wall' ? 28 : tool === 'rock' ? 24 : 20,
+            angle:
+              tool === 'wall'
+                ? Math.sin(objectsRef.current.length * 1.7) * 0.32
+                : 0,
           })
           objectsRef.current = objectsRef.current.slice(-36)
 
